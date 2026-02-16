@@ -14,7 +14,7 @@
         /* SCREENS */
         .screen { position: absolute; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background: #000; z-index: 1000; }
         
-        /* LOADING SCREEN (Default) */
+        /* LOADING SCREEN */
         #loading-screen { display: flex; z-index: 2000; }
         .loader { border: 4px solid #333; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -49,13 +49,13 @@
     
     <div id="loading-screen" class="screen">
         <div class="loader"></div>
-        <p>Checking Login...</p>
+        <p>Loading...</p>
     </div>
 
     <div id="login-screen" class="screen">
         <div class="logo"><i class="fab fa-tiktok"></i></div>
         <h1>TikApp</h1>
-        <p style="color:#777; margin-bottom:20px;">GitHub Version</p>
+        <p style="color:#777; margin-bottom:20px;">Final Version</p>
         <button class="btn-login" id="google-login-btn">
             <i class="fab fa-google"></i> Login with Google
         </button>
@@ -93,7 +93,8 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getAuth, signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged, getRedirectResult } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    // NOTE: Wapas 'signInWithPopup' use kar rahe hain jo GitHub par sahi chalta hai
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
@@ -114,38 +115,35 @@
     const provider = new GoogleAuthProvider();
     let currentUser = null;
 
-    // --- 1. AUTH STATE LISTENER (Sabse Zaroori) ---
+    // --- 1. AUTH STATE CHECK ---
     onAuthStateChanged(auth, (user) => {
-        // Hamesha pehle Loader hatao
         document.getElementById('loading-screen').style.display = 'none';
-
         if (user) {
-            // LOGIN SUCCESS
             currentUser = user;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'flex';
-            
             document.getElementById('my-name').innerText = user.displayName;
             document.getElementById('my-pic').src = user.photoURL;
             loadVideos();
         } else {
-            // LOGIN FAILED / NO USER
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('main-app').style.display = 'none';
         }
     });
 
-    // --- 2. LOGIN BUTTON ---
+    // --- 2. LOGIN WITH POPUP (FIXED) ---
     document.getElementById('google-login-btn').addEventListener('click', () => {
-        document.getElementById('error-msg').innerText = "Redirecting to Google...";
-        signInWithRedirect(auth, provider).catch((error) => {
-            document.getElementById('error-msg').innerText = error.message;
-        });
-    });
-
-    // --- 3. HANDLE REDIRECT ERRORS ---
-    getRedirectResult(auth).catch((error) => {
-        document.getElementById('error-msg').innerText = "Login Error: " + error.message;
+        document.getElementById('error-msg').innerText = "Opening Google Login...";
+        
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                // Login Success - onAuthStateChanged khud handle karega
+                document.getElementById('error-msg').innerText = "Success! Loading...";
+            })
+            .catch((error) => {
+                console.error(error);
+                document.getElementById('error-msg').innerText = "Error: " + error.message;
+            });
     });
 
     window.logout = () => signOut(auth).then(() => location.reload());
