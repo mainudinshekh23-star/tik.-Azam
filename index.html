@@ -1,100 +1,102 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TikApp - Mobile</title>
+    <title>TikApp Final</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- DESIGN STYLES --- */
         :root { --primary: #fe2c55; --secondary: #25f4ee; --bg: #000; --text: #fff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; justify-content: center; }
-        
         #app-container { width: 100%; max-width: 500px; height: 100%; background: #000; position: relative; display: flex; flex-direction: column; }
 
-        /* Login Page */
-        #login-screen { position: absolute; z-index: 999; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .logo { font-size: 60px; margin-bottom: 20px; text-shadow: 2px 2px 0 var(--secondary), -2px -2px 0 var(--primary); }
-        .btn-login { padding: 15px 30px; border-radius: 30px; border: none; font-size: 16px; font-weight: bold; background: white; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-top: 20px; }
+        /* SCREENS */
+        .screen { position: absolute; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background: #000; z-index: 1000; }
         
-        /* Main App Pages */
-        #main-app { display: none; height: 100%; flex-direction: column; }
+        /* LOADING SCREEN (Default) */
+        #loading-screen { display: flex; z-index: 2000; }
+        .loader { border: 4px solid #333; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* LOGIN SCREEN */
+        #login-screen { z-index: 1500; }
+        .logo { font-size: 60px; margin-bottom: 20px; text-shadow: 2px 2px 0 var(--secondary), -2px -2px 0 var(--primary); }
+        .btn-login { padding: 15px 30px; border-radius: 30px; border: none; font-size: 16px; font-weight: bold; background: white; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+
+        /* MAIN APP */
+        #main-app { display: none; height: 100%; flex-direction: column; z-index: 500; }
         .page { flex: 1; overflow-y: auto; display: none; position: relative; }
         .page.active { display: block; }
 
-        /* Home Feed */
+        /* Video Feed */
         #home-page { scroll-snap-type: y mandatory; overflow-y: scroll; height: 100%; }
         .video-card { width: 100%; height: 100%; scroll-snap-align: start; position: relative; background: #111; display: flex; justify-content: center; align-items: center; }
         .video-card video { width: 100%; height: 100%; object-fit: cover; }
-        .video-overlay { position: absolute; bottom: 80px; left: 10px; z-index: 2; text-shadow: 1px 1px 2px black; }
+        .video-overlay { position: absolute; bottom: 80px; left: 10px; z-index: 2; text-shadow: 1px 1px 2px black; pointer-events: none; }
         
-        /* Upload Modal */
-        #upload-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 500; display: none; flex-direction: column; justify-content: center; padding: 20px; }
-        .input-box { width: 100%; padding: 10px; margin: 10px 0; background: #333; border: none; color: white; border-radius: 5px; }
-
-        /* Bottom Nav */
+        /* Nav & Modals */
         .bottom-nav { height: 60px; background: black; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
         .nav-item { font-size: 22px; color: #777; cursor: pointer; }
         .nav-item.active { color: white; }
-        .add-btn { background: linear-gradient(90deg, var(--secondary), var(--primary)); padding: 2px 12px; border-radius: 8px; color: black; }
-
-        .hidden { display: none !important; }
+        #upload-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; flex-direction: column; justify-content: center; padding: 20px; }
+        .input-box { width: 100%; padding: 12px; margin: 10px 0; background: #333; border: none; color: white; border-radius: 5px; }
     </style>
 </head>
 <body>
 
 <div id="app-container">
     
-    <div id="login-screen">
+    <div id="loading-screen" class="screen">
+        <div class="loader"></div>
+        <p>Checking Login...</p>
+    </div>
+
+    <div id="login-screen" class="screen">
         <div class="logo"><i class="fab fa-tiktok"></i></div>
         <h1>TikApp</h1>
-        <p>Mobile Version</p>
+        <p style="color:#777; margin-bottom:20px;">GitHub Version</p>
         <button class="btn-login" id="google-login-btn">
             <i class="fab fa-google"></i> Login with Google
         </button>
-        <p id="status-msg" style="margin-top:20px; color:yellow; font-size:12px;"></p>
+        <p id="error-msg" style="color:red; margin-top:20px; font-size:12px; max-width:80%;"></p>
     </div>
 
     <div id="main-app">
-        <div id="home-page" class="page active">
-            <div style="display:flex; justify-content:center; align-items:center; height:100%; color:#555;">Loading Videos...</div>
-        </div>
-
-        <div id="profile-page" class="page" style="padding:20px; text-align:center;">
-            <img id="my-pic" src="" style="width:100px; height:100px; border-radius:50%; margin-bottom:10px;">
-            <h2 id="my-name">User</h2>
-            <button onclick="logout()" style="margin-top:20px; padding:10px; background:red; color:white; border:none;">Logout</button>
+        <div id="home-page" class="page active"></div>
+        
+        <div id="profile-page" class="page" style="text-align:center; padding-top:50px;">
+            <img id="my-pic" src="" style="width:100px; height:100px; border-radius:50%; border:2px solid var(--secondary);">
+            <h2 id="my-name" style="margin:10px 0;">User</h2>
+            <button onclick="logout()" style="padding:10px 20px; background:#333; color:white; border:none; border-radius:5px; margin-top:20px;">Logout</button>
         </div>
 
         <nav class="bottom-nav">
             <div class="nav-item active" onclick="switchPage('home', this)"><i class="fas fa-home"></i></div>
-            <div class="nav-item" onclick="openUpload()"><div class="add-btn"><i class="fas fa-plus"></i></div></div>
+            <div class="nav-item" onclick="openUpload()"><i class="fas fa-plus-square" style="color:white; font-size:28px;"></i></div>
             <div class="nav-item" onclick="switchPage('profile', this)"><i class="fas fa-user"></i></div>
         </nav>
     </div>
 
     <div id="upload-modal">
-        <h3>Upload Video</h3>
+        <h2 style="margin-bottom:20px;">Upload Video</h2>
         <input type="file" id="video-file" accept="video/*" class="input-box">
-        <input type="text" id="video-caption" placeholder="Caption..." class="input-box">
-        <p id="upload-status" style="color:var(--secondary);"></p>
+        <input type="text" id="video-caption" placeholder="Write a caption..." class="input-box">
+        <p id="upload-status" style="color:var(--secondary); margin:10px 0;"></p>
         <div style="display:flex; gap:10px;">
-            <button onclick="closeUpload()" style="flex:1; padding:10px;">Cancel</button>
-            <button onclick="uploadVideo()" style="flex:1; padding:10px; background:var(--primary); color:white; border:none;">Post</button>
+            <button onclick="closeUpload()" style="flex:1; padding:12px; background:#444; border:none; color:white;">Cancel</button>
+            <button onclick="uploadVideo()" style="flex:1; padding:12px; background:var(--primary); border:none; color:white;">Post</button>
         </div>
     </div>
 
 </div>
 
 <script type="module">
-    // Import Functions (Redirect wala method use kiya hai)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getAuth, signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getAuth, signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged, getRedirectResult } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
-    // AAPKA CONFIG (Jo aapne diya tha)
     const firebaseConfig = {
       apiKey: "AIzaSyBKbb6pYvIgJWLfR_67ZOiVGB6pcquYEF0",
       authDomain: "tiktok-clone-6582f.firebaseapp.com",
@@ -105,7 +107,6 @@
       measurementId: "G-L06911858V"
     };
 
-    // Initialize
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -113,33 +114,41 @@
     const provider = new GoogleAuthProvider();
     let currentUser = null;
 
-    // --- LOGIN LOGIC (REDIRECT) ---
-    const loginBtn = document.getElementById('google-login-btn');
-    loginBtn.addEventListener('click', () => {
-        document.getElementById('status-msg').innerText = "Redirecting to Google...";
-        // Mobile ke liye Redirect best hai
-        signInWithRedirect(auth, provider);
-    });
-
-    // Check Login State
+    // --- 1. AUTH STATE LISTENER (Sabse Zaroori) ---
     onAuthStateChanged(auth, (user) => {
+        // Hamesha pehle Loader hatao
+        document.getElementById('loading-screen').style.display = 'none';
+
         if (user) {
+            // LOGIN SUCCESS
             currentUser = user;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'flex';
             
-            // Profile Update
             document.getElementById('my-name').innerText = user.displayName;
             document.getElementById('my-pic').src = user.photoURL;
-            
-            loadVideos(); // Load Feed
+            loadVideos();
         } else {
+            // LOGIN FAILED / NO USER
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('main-app').style.display = 'none';
         }
     });
 
-    window.logout = () => signOut(auth);
+    // --- 2. LOGIN BUTTON ---
+    document.getElementById('google-login-btn').addEventListener('click', () => {
+        document.getElementById('error-msg').innerText = "Redirecting to Google...";
+        signInWithRedirect(auth, provider).catch((error) => {
+            document.getElementById('error-msg').innerText = error.message;
+        });
+    });
+
+    // --- 3. HANDLE REDIRECT ERRORS ---
+    getRedirectResult(auth).catch((error) => {
+        document.getElementById('error-msg').innerText = "Login Error: " + error.message;
+    });
+
+    window.logout = () => signOut(auth).then(() => location.reload());
 
     // --- UPLOAD LOGIC ---
     window.openUpload = () => document.getElementById('upload-modal').style.display = 'flex';
@@ -149,42 +158,42 @@
         const file = document.getElementById('video-file').files[0];
         const caption = document.getElementById('video-caption').value;
         const status = document.getElementById('upload-status');
-
-        if (!file) return alert("Select video first");
+        
+        if (!file) return status.innerText = "Please select a video!";
+        if (!currentUser) return alert("You must be logged in!");
 
         status.innerText = "Uploading... 0%";
-        
-        // Storage Ref
         const storageRef = ref(storage, 'videos/' + Date.now() + '_' + file.name);
         const uploadTask = uploadBytesResumable(storageRef, file);
 
         uploadTask.on('state_changed',
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            (snap) => {
+                const progress = (snap.bytesTransferred / snap.totalBytes) * 100;
                 status.innerText = "Uploading... " + Math.round(progress) + "%";
             },
-            (error) => { alert("Upload Error: " + error.message); },
+            (error) => { status.innerText = "Error: " + error.message; },
             () => {
                 getDownloadURL(uploadTask.snapshot.ref).then(async (url) => {
                     await addDoc(collection(db, "videos"), {
-                        url: url,
-                        caption: caption,
+                        url: url, caption: caption,
                         username: currentUser.displayName,
                         createdAt: serverTimestamp()
                     });
-                    status.innerText = "Done!";
-                    setTimeout(() => { closeUpload(); status.innerText=""; }, 1000);
+                    status.innerText = "Success!";
+                    setTimeout(() => { closeUpload(); status.innerText=""; loadVideos(); }, 1000);
                 });
             }
         );
     };
 
-    // --- LOAD VIDEOS ---
+    // --- LOAD FEED ---
     function loadVideos() {
         const q = query(collection(db, "videos"), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
             const container = document.getElementById('home-page');
             container.innerHTML = "";
+            if(snapshot.empty) container.innerHTML = "<p style='padding:20px; text-align:center; color:#555'>No videos yet. Be the first!</p>";
+            
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const div = document.createElement('div');
@@ -201,7 +210,6 @@
         });
     }
 
-    // --- NAVIGATION ---
     window.switchPage = (page, btn) => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(page + '-page').classList.add('active');
@@ -209,6 +217,5 @@
         btn.classList.add('active');
     }
 </script>
-
 </body>
 </html>
