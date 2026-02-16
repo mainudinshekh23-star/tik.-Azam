@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TikApp Final</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>TikApp Fixed</title>
     <style>
         :root { --primary: #fe2c55; --secondary: #25f4ee; --bg: #000; --text: #fff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
@@ -14,33 +13,39 @@
         /* SCREENS */
         .screen { position: absolute; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background: #000; z-index: 1000; }
         
-        /* LOADING SCREEN */
+        /* LOADING */
         #loading-screen { display: flex; z-index: 2000; }
         .loader { border: 4px solid #333; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* LOGIN SCREEN */
+        /* LOGIN */
         #login-screen { z-index: 1500; }
-        .logo { font-size: 60px; margin-bottom: 20px; text-shadow: 2px 2px 0 var(--secondary), -2px -2px 0 var(--primary); }
-        .btn-login { padding: 15px 30px; border-radius: 30px; border: none; font-size: 16px; font-weight: bold; background: white; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .btn-login { padding: 15px 30px; border-radius: 30px; border: none; font-size: 16px; font-weight: bold; background: white; cursor: pointer; color: black; }
 
         /* MAIN APP */
-        #main-app { display: none; height: 100%; flex-direction: column; z-index: 500; }
-        .page { flex: 1; overflow-y: auto; display: none; position: relative; }
+        #main-app { display: none; height: 100%; width: 100%; position: relative; }
+        .page { width: 100%; height: 100%; overflow-y: auto; display: none; padding-bottom: 70px; } /* Padding for bottom nav */
         .page.active { display: block; }
 
         /* Video Feed */
-        #home-page { scroll-snap-type: y mandatory; overflow-y: scroll; height: 100%; }
+        #home-page { scroll-snap-type: y mandatory; }
         .video-card { width: 100%; height: 100%; scroll-snap-align: start; position: relative; background: #111; display: flex; justify-content: center; align-items: center; }
         .video-card video { width: 100%; height: 100%; object-fit: cover; }
         .video-overlay { position: absolute; bottom: 80px; left: 10px; z-index: 2; text-shadow: 1px 1px 2px black; pointer-events: none; }
         
-        /* Nav & Modals */
-        .bottom-nav { height: 60px; background: black; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        .nav-item { font-size: 22px; color: #777; cursor: pointer; }
-        .nav-item.active { color: white; }
-        #upload-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; flex-direction: column; justify-content: center; padding: 20px; }
-        .input-box { width: 100%; padding: 12px; margin: 10px 0; background: #333; border: none; color: white; border-radius: 5px; }
+        /* FIXED BOTTOM NAV (EMOJI VERSION) */
+        .bottom-nav { 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; 
+            background: #111; border-top: 1px solid #333; 
+            display: flex; justify-content: space-around; align-items: center; z-index: 1000; 
+        }
+        .nav-item { font-size: 24px; cursor: pointer; text-align: center; color: #777; }
+        .nav-item.active { color: white; transform: scale(1.1); }
+        .add-btn-circle { width: 45px; height: 30px; background: white; border-radius: 5px; display: flex; justify-content: center; align-items: center; font-size: 20px; color: black; font-weight: bold; }
+
+        /* UPLOAD MODAL */
+        #upload-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: none; flex-direction: column; justify-content: center; padding: 20px; }
+        .input-box { width: 100%; padding: 15px; margin: 10px 0; background: #333; border: 1px solid #555; color: white; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -49,43 +54,39 @@
     
     <div id="loading-screen" class="screen">
         <div class="loader"></div>
-        <p>Loading...</p>
+        <p>Checking...</p>
     </div>
 
     <div id="login-screen" class="screen">
-        <div class="logo"><i class="fab fa-tiktok"></i></div>
-        <h1>TikApp</h1>
-        <p style="color:#777; margin-bottom:20px;">Final Version</p>
-        <button class="btn-login" id="google-login-btn">
-            <i class="fab fa-google"></i> Login with Google
-        </button>
-        <p id="error-msg" style="color:red; margin-top:20px; font-size:12px; max-width:80%;"></p>
+        <h1 style="color:var(--primary); margin-bottom:20px; font-size:40px;">TikApp</h1>
+        <button class="btn-login" id="google-login-btn">Login with Google</button>
+        <p id="error-msg" style="color:red; margin-top:20px; font-size:12px;"></p>
     </div>
 
     <div id="main-app">
         <div id="home-page" class="page active"></div>
         
         <div id="profile-page" class="page" style="text-align:center; padding-top:50px;">
-            <img id="my-pic" src="" style="width:100px; height:100px; border-radius:50%; border:2px solid var(--secondary);">
-            <h2 id="my-name" style="margin:10px 0;">User</h2>
-            <button onclick="logout()" style="padding:10px 20px; background:#333; color:white; border:none; border-radius:5px; margin-top:20px;">Logout</button>
+            <img id="my-pic" src="" style="width:100px; height:100px; border-radius:50%; margin-bottom:10px;">
+            <h2 id="my-name">User</h2>
+            <button onclick="logout()" style="margin-top:20px; padding:10px 20px; background:red; color:white; border:none; border-radius:5px;">Logout</button>
         </div>
 
         <nav class="bottom-nav">
-            <div class="nav-item active" onclick="switchPage('home', this)"><i class="fas fa-home"></i></div>
-            <div class="nav-item" onclick="openUpload()"><i class="fas fa-plus-square" style="color:white; font-size:28px;"></i></div>
-            <div class="nav-item" onclick="switchPage('profile', this)"><i class="fas fa-user"></i></div>
+            <div class="nav-item active" onclick="switchPage('home', this)">🏠</div>
+            <div class="nav-item" onclick="openUpload()"><div class="add-btn-circle">➕</div></div>
+            <div class="nav-item" onclick="switchPage('profile', this)">👤</div>
         </nav>
     </div>
 
     <div id="upload-modal">
-        <h2 style="margin-bottom:20px;">Upload Video</h2>
+        <h2 style="color:white; margin-bottom:20px;">Upload Video</h2>
         <input type="file" id="video-file" accept="video/*" class="input-box">
-        <input type="text" id="video-caption" placeholder="Write a caption..." class="input-box">
+        <input type="text" id="video-caption" placeholder="Caption likho..." class="input-box">
         <p id="upload-status" style="color:var(--secondary); margin:10px 0;"></p>
-        <div style="display:flex; gap:10px;">
-            <button onclick="closeUpload()" style="flex:1; padding:12px; background:#444; border:none; color:white;">Cancel</button>
-            <button onclick="uploadVideo()" style="flex:1; padding:12px; background:var(--primary); border:none; color:white;">Post</button>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button onclick="closeUpload()" style="flex:1; padding:12px; background:#555; border:none; color:white; border-radius:5px;">Cancel</button>
+            <button onclick="uploadVideo()" style="flex:1; padding:12px; background:var(--primary); border:none; color:white; border-radius:5px;">POST</button>
         </div>
     </div>
 
@@ -93,7 +94,6 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    // NOTE: Wapas 'signInWithPopup' use kar rahe hain jo GitHub par sahi chalta hai
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
@@ -115,13 +115,13 @@
     const provider = new GoogleAuthProvider();
     let currentUser = null;
 
-    // --- 1. AUTH STATE CHECK ---
+    // LOGIN LOGIC
     onAuthStateChanged(auth, (user) => {
         document.getElementById('loading-screen').style.display = 'none';
         if (user) {
             currentUser = user;
             document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'block';
             document.getElementById('my-name').innerText = user.displayName;
             document.getElementById('my-pic').src = user.photoURL;
             loadVideos();
@@ -131,24 +131,13 @@
         }
     });
 
-    // --- 2. LOGIN WITH POPUP (FIXED) ---
     document.getElementById('google-login-btn').addEventListener('click', () => {
-        document.getElementById('error-msg').innerText = "Opening Google Login...";
-        
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                // Login Success - onAuthStateChanged khud handle karega
-                document.getElementById('error-msg').innerText = "Success! Loading...";
-            })
-            .catch((error) => {
-                console.error(error);
-                document.getElementById('error-msg').innerText = "Error: " + error.message;
-            });
+        signInWithPopup(auth, provider).catch(err => alert(err.message));
     });
 
     window.logout = () => signOut(auth).then(() => location.reload());
 
-    // --- UPLOAD LOGIC ---
+    // UPLOAD LOGIC
     window.openUpload = () => document.getElementById('upload-modal').style.display = 'flex';
     window.closeUpload = () => document.getElementById('upload-modal').style.display = 'none';
 
@@ -156,10 +145,9 @@
         const file = document.getElementById('video-file').files[0];
         const caption = document.getElementById('video-caption').value;
         const status = document.getElementById('upload-status');
-        
-        if (!file) return status.innerText = "Please select a video!";
-        if (!currentUser) return alert("You must be logged in!");
 
+        if (!file) return alert("Video select karo!");
+        
         status.innerText = "Uploading... 0%";
         const storageRef = ref(storage, 'videos/' + Date.now() + '_' + file.name);
         const uploadTask = uploadBytesResumable(storageRef, file);
@@ -177,34 +165,44 @@
                         username: currentUser.displayName,
                         createdAt: serverTimestamp()
                     });
-                    status.innerText = "Success!";
+                    status.innerText = "Done!";
                     setTimeout(() => { closeUpload(); status.innerText=""; loadVideos(); }, 1000);
                 });
             }
         );
     };
 
-    // --- LOAD FEED ---
+    // LOAD VIDEOS (Center Button Added)
     function loadVideos() {
         const q = query(collection(db, "videos"), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
             const container = document.getElementById('home-page');
             container.innerHTML = "";
-            if(snapshot.empty) container.innerHTML = "<p style='padding:20px; text-align:center; color:#555'>No videos yet. Be the first!</p>";
-            
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const div = document.createElement('div');
-                div.className = 'video-card';
-                div.innerHTML = `
-                    <video src="${data.url}" controls loop playsinline></video>
-                    <div class="video-overlay">
-                        <h3>@${data.username}</h3>
-                        <p>${data.caption}</p>
+            if(snapshot.empty) {
+                // AGAR LIST EMPTY HAI TOH BADA UPLOAD BUTTON DIKHAO
+                container.innerHTML = `
+                    <div style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#777;">
+                        <p style="margin-bottom:20px;">Koi video nahi hai!</p>
+                        <button onclick="openUpload()" style="padding:15px 30px; background:var(--primary); color:white; border:none; border-radius:30px; font-size:18px;">
+                            📹 Pehli Video Daalo
+                        </button>
                     </div>
                 `;
-                container.appendChild(div);
-            });
+            } else {
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'video-card';
+                    div.innerHTML = `
+                        <video src="${data.url}" controls loop playsinline></video>
+                        <div class="video-overlay">
+                            <h3>@${data.username}</h3>
+                            <p>${data.caption}</p>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
         });
     }
 
